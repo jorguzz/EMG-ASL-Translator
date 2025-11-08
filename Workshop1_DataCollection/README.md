@@ -5,7 +5,6 @@ Files included:
 - serial_logger.py     : Reads serial CSV rows and logs to CSV
 - data_logger.py       : Reusable logger for labeled EMG data
 - workshop_demo.py     : Switch between Ganglion and Serial modes and log data
-- slides.pdf           : Workshop slide deck (tech style, includes teaching notes)
 - this README.md       : Setup notes
 
 ## Python environment
@@ -24,5 +23,5 @@ Recommended: Python 3.12 (per team). Install:
    python serial_logger.py --port COM4 --baud 115200 --duration 10 --out emg_mock.csv
 
 ## Notes
-- The scripts are intentionally minimal and pedagogical. They will need improvements for production (error handling, robust channel selection, timestamps synced to board).
+- The scripts are intentionally simple for learning. They will need improvements for production (error handling, robust channel selection, timestamps synced to board).
 - Use `data_logger.py` to standardize CSV format for downstream processing.
