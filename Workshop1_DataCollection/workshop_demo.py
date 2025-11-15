@@ -13,7 +13,7 @@ import argparse
 import time
 from datetime import datetime
 from data_logger import DataLogger
-
+from pylsl import StreamOutlet, StreamInfo
 
 # ---------------------------------------------------------------------
 #  Ganglion (BrainFlow) Mode
@@ -40,6 +40,16 @@ def ganglion_mode(args):
     params.file = args.file
     params.master_board = args.master_board
 
+    #Describing our info stream
+    info = StreamInfo('EMG band', 
+                      type='EMG',
+                      channel_count = 4,
+                      nominal_srate = 200, 
+                      channel_format='float32',
+                      source_id='ganglion_emg')
+    #Initializing outlet for the data stream
+    lsl_outlet = StreamOutlet(info)
+
     # Connect and start streaming
     board = BoardShim(args.board_id, params)
     board.prepare_session()
@@ -62,36 +72,11 @@ def ganglion_mode(args):
             ts = time.time()
             chans = [float(sample[i]) if i < len(sample) else 0.0 for i in range(4)]
             dl.write_row(ts, chans, label="")  # labels added later
+            lsl_outlet.push_sample(chans)
 
     board.stop_stream()
     board.release_session()
     print("Ganglion stream complete.")
-
-
-# ---------------------------------------------------------------------
-#  Serial (Arduino) Mode
-# ---------------------------------------------------------------------
-def serial_mode(port, baud, duration):
-    import serial
-
-    dl = DataLogger(out_dir="data",
-                    session_name="serial_" + time.strftime("%Y%m%d_%H%M%S"),
-                    channels=4)
-
-    with serial.Serial(port, baud, timeout=1) as ser:
-        start = time.time()
-        while time.time() - start < duration:
-            line = ser.readline().decode(errors="ignore").strip()
-            if not line:
-                continue
-            parts = [p.strip() for p in line.split(",") if p.strip() != ""]
-            if len(parts) < 4:
-                continue
-            ts = time.time()
-            dl.write_row(ts, parts[:4], label="")
-
-    print("Serial logging complete.")
-
 
 # ---------------------------------------------------------------------
 #  Main CLI Entry Point
@@ -126,7 +111,7 @@ if __name__ == "__main__":
     if args.mode == "ganglion":
         assert args.serial_port, "Provide --serial-port for Ganglion mode"
         ganglion_mode(args)
-    else:
-        assert args.port, "Provide --port for Serial mode"
-        serial_mode(args.port, args.baud, args.duration)
+      
+        
+    
 
