@@ -14,7 +14,7 @@ class Threshold:
     def get_signal(self):
         streams = resolve_stream('type', 'EMG')
         for stream in streams:
-            if stream.name() == "EMG Game":
+            if stream.name() == "EMG Band":
                 self.inlet = StreamInlet(stream, max_buflen = 1)
                 print('received stream')
                 break
@@ -105,6 +105,5 @@ class Threshold:
 if __name__ == "__main__":
     threshold = Threshold()
     threshold.get_signal()
-    threshold.set_pull()
     threshold.calibrate()
     threshold.listen()
